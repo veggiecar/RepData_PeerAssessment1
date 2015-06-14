@@ -138,5 +138,30 @@ For this part the weekdays() function may be of some help here. Use the dataset 
 
 1 Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
+```{r echo = TRUE, warning=FALSE}
+newdataset$date <- as.Date(newdataset$date)
+wd <- c('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday')
+newdataset$day <- factor((weekdays(newdataset$date) %in% wd), levels=c(FALSE, TRUE), labels=c('weekend', 'weekday'))
+```
+
 2 Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
 
+```{r echo = TRUE, warning=FALSE}
+splitnds <- split( newdataset , newdataset$day )
+
+attach(splitnds[[1]])
+aggdata1 <-aggregate(splitnds[[1]], by=list(interval),na.rm=TRUE, FUN=mean)
+detach(splitnds[[1]])
+
+attach(splitnds[[2]])
+aggdata2 <-aggregate(splitnds[[2]], by=list(interval),na.rm=TRUE, FUN=mean)
+detach(splitnds[[2]])
+
+
+library(ggplot2)
+library(grid)
+library(gridExtra)
+p1 <- qplot(interval, steps, data = aggdata1, main="Weekend", geom = "line")
+p2 <- qplot(interval, steps, data = aggdata2, main="Weekday", geom = "line")
+grid.arrange(p1, p2, ncol = 1)
+```
